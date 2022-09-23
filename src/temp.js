@@ -5,20 +5,11 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const API_KEY = '30099425-45e663ebfa49895e0599559cc';
-const URL = 'https://pixabay.com/api/?';
+const URL = 'https://pixabay.com/api/?key=' + API_KEY;
 let searchString = 'red roses';
-const requestParams = {
-  params: {
-    key: API_KEY,
-    image_type: 'photo',
-    orientation: 'horizontal',
-    safesearch: 'true',
-    per_page: 10,
-    page: 1,
-    q: '',
-    // responseType: 'json',
-  },
-};
+let fullURL = URL + '&q=' + encodeURIComponent(searchString);
+let page = 1;
+let perPage = 10;
 
 const axios = require('axios');
 const gallery = new SimpleLightbox('.gallery a', { captionsData: 'title', captionDelay: 250 });
@@ -34,9 +25,13 @@ refs.loadMore.addEventListener('click', onLoadMore);
 
 function fetchImages(fullURL) {
   axios
-    .get(URL, requestParams)
+    .get(fullURL, {
+      params: {
+        // responseType: 'json',
+      },
+    })
     .then(function (response) {
-      console.dir(response);
+      console.dir(response.data.hits);
       return response.data.hits.map(destructHitsArray);
     })
     .then(function (hits) {
@@ -105,14 +100,16 @@ function onSearch(event) {
   event.preventDefault();
   searchString = event.currentTarget.elements.searchQuery.value;
   console.dir(searchString);
-  requestParams.params.q = encodeURIComponent(searchString);
-  requestParams.params.page = 1;
+  fullURL =
+    URL + '&q=' + encodeURIComponent(searchString) + '&page=' + page + '&per_page=' + perPage;
   clearGalleryMarkup(refs.gallery);
-  fetchImages(URL);
+  fetchImages(fullURL);
 }
 
 function onLoadMore(event) {
   event.preventDefault();
-  requestParams.params.page += 1;
-  fetchImages(URL);
+  page += 1;
+  fullURL =
+    URL + '&q=' + encodeURIComponent(searchString) + '&page=' + page + '&per_page=' + perPage;
+  fetchImages(fullURL);
 }
