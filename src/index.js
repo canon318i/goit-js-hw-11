@@ -11,9 +11,9 @@ const requestParams = {
   params: {
     key: API_KEY,
     image_type: 'photo',
-    orientation: 'horizontal',
+    // orientation: 'horizontal',
     safesearch: 'true',
-    per_page: 10,
+    per_page: 12,
     page: 1,
     q: '',
     // responseType: 'json',
@@ -71,18 +71,18 @@ function createGalleryMarkup(hits) {
       return `
             <a class="gallery__item" href="${href}">
               <img class="gallery__image" src="${src}" alt="${alt}" title="${alt}" loading="lazy"/>
-              <div class="info">
-              <p class="info-item">
-                <b>Likes: ${likes}</b>
+              <div class="gallery__info">
+              <p class="info__item">
+                <b>Likes </b><br>${likes}
               </p>
-              <p class="info-item">
-                <b>Views: ${views}</b>
+              <p class="info__item">
+                <b>Views </b><br>${views}
               </p>
-              <p class="info-item">
-                <b>Comments: ${comments}</b>
+              <p class="info__item">
+                <b>Comments </b><br>${comments}
               </p>
-              <p class="info-item">
-                <b>Downloads: ${downloads}</b>
+              <p class="info__item">
+                <b>Downloads </b><br>${downloads}
               </p>
               </div>
             </a>
