@@ -36,15 +36,9 @@ function fetchImages(fullURL) {
   axios
     .get(URL, requestParams)
     .then(function (response) {
-      console.dir(response);
-      return response.data.hits.map(destructHitsArray);
-    })
-    .then(function (hits) {
-      console.dir(hits);
-      return createGalleryMarkup(hits);
+      return createGalleryMarkup(response.data.hits);
     })
     .then(function (markup) {
-      // console.dir(markup);
       addGalleryMarkup(refs.gallery, markup);
     })
     .catch(function (error) {
@@ -52,25 +46,12 @@ function fetchImages(fullURL) {
     });
 }
 
-function destructHitsArray(hit) {
-  const {
-    webformatURL: src,
-    largeImageURL: href,
-    tags: alt,
-    likes,
-    views,
-    comments,
-    downloads,
-  } = hit;
-  return { src, href, alt, likes, views, comments, downloads };
-}
-
 function createGalleryMarkup(hits) {
   return hits
-    .map(({ src, href, alt, likes, views, comments, downloads }) => {
+    .map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
       return `
-            <a class="gallery__item" href="${href}">
-              <img class="gallery__image" src="${src}" alt="${alt}" title="${alt}" loading="lazy"/>
+            <a class="gallery__item" href="${largeImageURL}">
+              <img class="gallery__image" src="${webformatURL}" alt="${tags}" title="${tags}" loading="lazy"/>
               <div class="gallery__info">
               <p class="info__item">
                 <b>Likes </b><br>${likes}
@@ -104,7 +85,6 @@ function addGalleryMarkup(galleryRef, htmlString) {
 function onSearch(event) {
   event.preventDefault();
   searchString = event.currentTarget.elements.searchQuery.value;
-  console.dir(searchString);
   requestParams.params.q = encodeURIComponent(searchString);
   requestParams.params.page = 1;
   clearGalleryMarkup(refs.gallery);
