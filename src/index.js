@@ -1,6 +1,7 @@
 import './sass/main.scss';
 
 import Notiflix from 'notiflix';
+import hbsGalleryMarkup from './templates/gallery.hbs';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
@@ -28,48 +29,40 @@ const refs = {
   loadMore: document.querySelector('.load-more'),
 };
 
-Notiflix.Notify.info('Notiflix is working');
 refs.searchForm.addEventListener('submit', onSearch);
 refs.loadMore.addEventListener('click', onLoadMore);
 
 function fetchImages(fullURL) {
   axios
     .get(URL, requestParams)
-    .then(function (response) {
-      return createGalleryMarkup(response.data.hits);
-    })
-    .then(function (markup) {
-      addGalleryMarkup(refs.gallery, markup);
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+    .then(response => parceResponse(response))
+    .then(hits => createGalleryMarkup(hits))
+    .then(markup => addGalleryMarkup(refs.gallery, markup))
+    .catch(error => console.log(error));
+}
+
+function parceResponse(response) {
+  console.dir(response);
+  if (response.data.totalHits === 0) {
+    Notiflix.Notify.failure(
+      `Sorry, there are no images matching your search query. Please try again.`,
+    );
+    return [];
+  }
+  if (response.data.totalHits > 0 && response.data.hits.lenght < requestParams.params.per_page) {
+    Notiflix.Notify.warning(`We're sorry, but you've reached the end of search results.`);
+    return [];
+  }
+
+  return response.data.hits;
 }
 
 function createGalleryMarkup(hits) {
-  return hits
-    .map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
-      return `
-            <a class="gallery__item" href="${largeImageURL}">
-              <img class="gallery__image" src="${webformatURL}" alt="${tags}" title="${tags}" loading="lazy"/>
-              <div class="gallery__info">
-              <p class="info__item">
-                <b>Likes </b><br>${likes}
-              </p>
-              <p class="info__item">
-                <b>Views </b><br>${views}
-              </p>
-              <p class="info__item">
-                <b>Comments </b><br>${comments}
-              </p>
-              <p class="info__item">
-                <b>Downloads </b><br>${downloads}
-              </p>
-              </div>
-            </a>
-            `;
-    })
-    .join('');
+  if (hits.length > 0) return hits.map(hit => hbsGalleryMarkup(hit)).join('');
+  Notiflix.Notify.failure(
+    `Sorry, there are no images matching your search query. Please try again.`,
+  );
+  return '';
 }
 
 function clearGalleryMarkup(galleryRef) {
@@ -79,7 +72,6 @@ function clearGalleryMarkup(galleryRef) {
 function addGalleryMarkup(galleryRef, htmlString) {
   galleryRef.insertAdjacentHTML('beforeend', htmlString);
   gallery.refresh();
-  console.log(gallery.refresh());
 }
 
 function onSearch(event) {
