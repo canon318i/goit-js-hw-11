@@ -4,6 +4,7 @@ import Notiflix from 'notiflix';
 import hbsGalleryMarkup from './templates/gallery.hbs';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+import LoadMoreBtn from './components/_load_more_btn';
 
 const API_KEY = '30099425-45e663ebfa49895e0599559cc';
 const URL = 'https://pixabay.com/api/?';
@@ -14,7 +15,7 @@ const requestParams = {
     image_type: 'photo',
     // orientation: 'horizontal',
     safesearch: 'true',
-    per_page: 12,
+    per_page: 3,
     page: 1,
     q: '',
     // responseType: 'json',
@@ -23,6 +24,8 @@ const requestParams = {
 
 const axios = require('axios');
 const gallery = new SimpleLightbox('.gallery a', { captionsData: 'title', captionDelay: 250 });
+const loadMoreBtn = new LoadMoreBtn({ selector: '.load-more' });
+
 const refs = {
   gallery: document.querySelector('.gallery'),
   searchForm: document.querySelector('.search-form'),
@@ -33,7 +36,7 @@ refs.searchForm.addEventListener('submit', onSearch);
 refs.loadMore.addEventListener('click', onLoadMore);
 
 function fetchImages(fullURL) {
-  axios
+  return axios
     .get(URL, requestParams)
     .then(response => parceResponse(response))
     .then(hits => createGalleryMarkup(hits))
@@ -80,11 +83,12 @@ function onSearch(event) {
   requestParams.params.q = encodeURIComponent(searchString);
   requestParams.params.page = 1;
   clearGalleryMarkup(refs.gallery);
-  fetchImages(URL);
+  fetchImages(URL).then(loadMoreBtn.show());
 }
 
 function onLoadMore(event) {
   event.preventDefault();
   requestParams.params.page += 1;
-  fetchImages(URL);
+  loadMoreBtn.disable();
+  fetchImages(URL).then(setTimeout(() => loadMoreBtn.enable(), 250));
 }
