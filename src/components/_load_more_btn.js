@@ -12,21 +12,21 @@ export default class LoadMoreBtn {
     return refs;
   }
 
-  show() {
+  async show() {
     this.refs.button.classList.remove('visually-hidden');
   }
 
-  hide() {
+  async hide() {
     this.refs.button.classList.add('visually-hidden');
   }
 
-  enable() {
+  async enable() {
     this.refs.button.disabled = false;
     this.refs.label.textContent = 'Load more';
     this.refs.spinner.classList.add('visually-hidden');
   }
 
-  disable() {
+  async disable() {
     this.refs.button.disabled = true;
     this.refs.label.textContent = 'Loading ...';
     this.refs.spinner.classList.remove('visually-hidden');

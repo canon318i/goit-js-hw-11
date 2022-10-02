@@ -8,14 +8,13 @@ import LoadMoreBtn from './components/_load_more_btn';
 
 const API_KEY = '30099425-45e663ebfa49895e0599559cc';
 const URL = 'https://pixabay.com/api/?';
-let searchString = 'red roses';
 const requestParams = {
   params: {
     key: API_KEY,
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: 'true',
-    per_page: 9,
+    per_page: 12,
     page: 1,
     q: '',
   },
@@ -47,11 +46,11 @@ const refs = {
 refs.searchForm.addEventListener('submit', onSearch);
 refs.loadMore.addEventListener('click', onLoadMore);
 
-function fetchImages(URL, requestParams) {
+async function fetchImages(URL, requestParams) {
   return axios.get(URL, requestParams);
 }
 
-function parceResponse(response) {
+async function parceResponse(response) {
   if (response.data.totalHits === 0) {
     Notiflix.Notify.failure(
       `Sorry, there are no images matching your search query. Please try again.`,
@@ -69,7 +68,7 @@ function parceResponse(response) {
   return response.data.hits;
 }
 
-function createGalleryMarkup(hits) {
+async function createGalleryMarkup(hits) {
   return hits.map(hbsGalleryMarkup).join('');
 }
 
@@ -77,12 +76,12 @@ function clearGalleryMarkup(galleryRef) {
   galleryRef.innerHTML = '';
 }
 
-function addGalleryMarkup(galleryRef, htmlString) {
+async function addGalleryMarkup(galleryRef, htmlString) {
   galleryRef.insertAdjacentHTML('beforeend', htmlString);
   gallery.refresh();
 }
 
-function scrollPage() {
+async function scrollPage() {
   const { height: cardHeight } = refs.gallery.firstElementChild.getBoundingClientRect();
   window.scrollBy({
     top: cardHeight * 3,
@@ -90,31 +89,35 @@ function scrollPage() {
   });
 }
 
-function onSearch(event) {
+async function onSearch(event) {
   event.preventDefault();
   requestParams.setQueryString(event.currentTarget.elements.searchQuery.value);
   requestParams.resetPage();
-  loadMoreBtn.hide();
   clearGalleryMarkup(refs.gallery);
-
-  fetchImages(URL, requestParams)
-    .then(response => parceResponse(response))
-    .then(hits => createGalleryMarkup(hits))
-    .then(markup => addGalleryMarkup(refs.gallery, markup))
-    .then(setTimeout(() => loadMoreBtn.show(), 250))
-    .catch(error => console.log(error));
+  try {
+    await loadMoreBtn.hide();
+    const response = await fetchImages(URL, requestParams);
+    const hits = await parceResponse(response);
+    const markup = await createGalleryMarkup(hits);
+    await addGalleryMarkup(refs.gallery, markup);
+    await loadMoreBtn.show();
+  } catch (error) {
+    console.log(error);
+  }
 }
 
-function onLoadMore(event) {
+async function onLoadMore(event) {
   event.preventDefault();
   requestParams.nextPage();
-  loadMoreBtn.disable();
-
-  fetchImages(URL, requestParams)
-    .then(response => parceResponse(response))
-    .then(hits => createGalleryMarkup(hits))
-    .then(markup => addGalleryMarkup(refs.gallery, markup))
-    .then(scrollPage)
-    .then(setTimeout(() => loadMoreBtn.enable(), 250))
-    .catch(error => console.log(error));
+  try {
+    await loadMoreBtn.disable();
+    const response = await fetchImages(URL, requestParams);
+    const hits = await parceResponse(response);
+    const markup = await createGalleryMarkup(hits);
+    await addGalleryMarkup(refs.gallery, markup);
+    await scrollPage();
+    await loadMoreBtn.enable();
+  } catch (error) {
+    console.log(error);
+  }
 }
