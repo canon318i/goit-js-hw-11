@@ -90,5 +90,5 @@ function onLoadMore(event) {
   event.preventDefault();
   requestParams.params.page += 1;
   loadMoreBtn.disable();
-  fetchImages(URL).then(setTimeout(() => loadMoreBtn.enable(), 250));
+  fetchImages(URL).then(setTimeout(() => loadMoreBtn.enable(), 2500));
 }

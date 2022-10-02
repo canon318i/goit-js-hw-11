@@ -28,6 +28,11 @@
     background-color: var(--btn-accent-color);
   }
 
+        &:disabled,
+        &[disabled] {
+          background-color: var(--btn-disabled-color);
+        }
+
   & svg {
     margin-left: 10px;
   }
