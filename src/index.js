@@ -15,7 +15,7 @@ const requestParams = {
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: 'true',
-    per_page: 3,
+    per_page: 9,
     page: 1,
     q: '',
   },
@@ -82,6 +82,14 @@ function addGalleryMarkup(galleryRef, htmlString) {
   gallery.refresh();
 }
 
+function scrollPage() {
+  const { height: cardHeight } = refs.gallery.firstElementChild.getBoundingClientRect();
+  window.scrollBy({
+    top: cardHeight * 3,
+    behavior: 'smooth',
+  });
+}
+
 function onSearch(event) {
   event.preventDefault();
   requestParams.setQueryString(event.currentTarget.elements.searchQuery.value);
@@ -106,6 +114,7 @@ function onLoadMore(event) {
     .then(response => parceResponse(response))
     .then(hits => createGalleryMarkup(hits))
     .then(markup => addGalleryMarkup(refs.gallery, markup))
+    .then(scrollPage)
     .then(setTimeout(() => loadMoreBtn.enable(), 250))
     .catch(error => console.log(error));
 }
