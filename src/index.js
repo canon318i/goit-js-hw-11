@@ -57,7 +57,8 @@ async function parceResponse(response) {
     );
     return [];
   }
-  if (response.data.totalHits > 0 && response.data.hits.length < requestParams.params.per_page) {
+  // if (response.data.totalHits > 0 && response.data.hits.length < requestParams.params.per_page) {
+  if (response.data.totalHits > 0 && response.data.hits.length === 0) {
     Notiflix.Notify.warning(`We're sorry, but you've reached the end of search results.`);
     return [];
   }
