@@ -47,7 +47,7 @@ refs.searchForm.addEventListener('submit', onSearch);
 refs.loadMore.addEventListener('click', onLoadMore);
 
 async function fetchImages(URL, requestParams) {
-  return axios.get(URL, requestParams);
+  return await axios.get(URL, requestParams);
 }
 
 async function parceResponse(response) {
